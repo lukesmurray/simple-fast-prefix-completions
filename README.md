@@ -23,3 +23,14 @@ expect(sa.findWords("s")).toEqual(["so", "soap", "soupy", "soapy"]);
 We may be able to fix by iterating through the word in the leftmost match until we find a word which doesn't prefix match our target. (No doesn't work, unless input is sorted)
 
 One of the tests isn't working
+
+Add a sentinel to the start of each word
+
+Solving top k
+
+- we want range maximum for a range
+- once we find the maximum we can just split
+- array of numbers with priority associated wiht each number, left binary search, right binary search to find interval, use range data structure to find largest priority, once you find that split in two and find largest priority in two sides
+- interval range maximum query
+
+- could potentially split into higher and lower priority
