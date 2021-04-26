@@ -1,10 +1,10 @@
 import { words } from "../perf/words";
-import { SuffixArray } from "../src";
+import { SimpleFastPrefixCompletions } from "../src";
 
 const SEPARATOR = "\u0001";
 
 describe("suffix", () => {
-  const sa = new SuffixArray({ SEPARATOR, words });
+  const sa = new SimpleFastPrefixCompletions({ SEPARATOR, words });
 
   it("finds the correct suffixes for cherub", () => {
     expect(sa.findWords("cherub")).toEqual([
@@ -41,7 +41,7 @@ describe("suffix", () => {
 
   it("serializes", () => {
     const serializedSA = sa.toJSON();
-    const deserializedSA = SuffixArray.fromJSON(serializedSA);
+    const deserializedSA = SimpleFastPrefixCompletions.fromJSON(serializedSA);
     expect(deserializedSA.findWords("console")).toEqual([
       "console",
       "consoled",

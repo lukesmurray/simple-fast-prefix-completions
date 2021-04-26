@@ -1,5 +1,5 @@
 import { performance, PerformanceObserver } from "perf_hooks";
-import { SuffixArray } from "../src";
+import { SimpleFastPrefixCompletions } from "../src";
 import { words } from "./words";
 
 const SEPARATOR = "\u0001";
@@ -13,7 +13,7 @@ const perfObserver = new PerformanceObserver((items) => {
 perfObserver.observe({ entryTypes: ["measure"], buffered: true });
 
 performance.mark("begin building suffix array");
-const sa = new SuffixArray({ SEPARATOR, words });
+const sa = new SimpleFastPrefixCompletions({ SEPARATOR, words });
 performance.mark("Finish building suffix array");
 performance.measure(
   "Build Suffix Array",
@@ -35,7 +35,7 @@ performance.measure(
 );
 
 performance.mark("begin deserialize suffix array");
-SuffixArray.fromJSON(serializedSA);
+SimpleFastPrefixCompletions.fromJSON(serializedSA);
 performance.mark("end deserialize suffix array");
 performance.measure(
   "deserialize suffix array",
@@ -54,6 +54,9 @@ for (let needle of [
   "lazy",
   "dog",
   "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+  "a",
+  "b",
+  "c",
 ]) {
   performance.mark(`Begin searching for ${needle}`);
   sa.findWords(needle);

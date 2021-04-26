@@ -1,41 +1,53 @@
-# Suffix Array Prefix Search
+# Simple Fast Prefix Completions
 
-Algorithm to do prefix matching based on a suffix array.
-All strings T are concatenated into a string of length m.
-To match a pattern of length n takes O(n log m) time since we need to do O(log m) comparisons of an n letter prefix.
-We then need to iterate through suffixes which takes O(m) time.
+This package implements simple and fast prefix completions in javascript.
+In the future the package will support top K completions.
 
-Final run time O(n log m) + O(m).
+## Usage
 
-## TODOs
+```tsx
+import { SimpleFastPrefixCompletions } from "simple-fast-prefix-completions";
 
-Ranking is currently alphabetical rather than passed in rank.
+const words = ["sally", "sells", "seashells", "by", "the", "seashore"];
+const completions = new SimpleFastPrefixCompletions({
+  words,
+});
 
-```ts
-const words = ["so", "soap", "soupy", "soapy"];
-const sa = new SuffixArray({ SEPARATOR, words });
-// current semantics
-expect(sa.findWords("s")).toEqual(["so", "soap", "soapy", "soupy"]);
-// expected semantics
-expect(sa.findWords("s")).toEqual(["so", "soap", "soupy", "soapy"]);
+// search by prefix returns prefixes in lexicographically sorted order
+console.log(completions.findWords("se"));
+// ["seashells", "seashore", "sells"]
+
+// serialize to json
+const serialized = completions.toJSON();
+
+// deserialize from json
+const deserialized = SimpleFastPrefixCompletions.fromJSON(serialized);
 ```
 
-We may be able to fix by iterating through the word in the leftmost match until we find a word which doesn't prefix match our target. (No doesn't work, unless input is sorted)
+## Runtime and Space Constraints
 
-One of the tests isn't working
+Given a dataset of `n` words and a prefix of length `p`.
 
-~~Add a sentinel to the start of each word~~
+Creating a new completion object from scratch takes `O(n log n) + O(n)` time.
 
-~~Currently the algorithm isn't working because the underlying suffix tree isn't correctly lexographically sorted. Need to debug.~~
+Finding the `m` matching completions for a prefix of length `p` takes `2 * O(p log n) + O(m)`.
 
-Solving top k
+The completion object takes `O(c + n)` space where `c` is the number of characters in all the words and `n` is the number of words.
 
-- we want range maximum for a range
-- once we find the maximum we can just split
-- array of numbers with priority associated wiht each number, left binary search, right binary search to find interval, use range data structure to find largest priority, once you find that split in two and find largest priority in two sides
-- interval range maximum query
+## TODO
+
+Solving Top K
+
+- create a range maximum query for the array
+- once we find the maximum for any range we split
+  - find largest in either two sides
+- top K is then `O(k * log n)`
+
+Avoiding large lists in top k
 
 - could potentially split into higher and lower priority
+- under the hood the data is stored as a concatenated string
+- trick is to have one string for the short tail and another string for the long tail
 
 # Range Maximum Query
 

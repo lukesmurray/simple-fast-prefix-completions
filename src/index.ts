@@ -1,2 +1,1 @@
-export * from "./binarySearch";
-export * from "./suffixArray";
+export * from "./simpleFastPrefixCompletions";

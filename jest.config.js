@@ -1,5 +1,6 @@
 module.exports = {
   transform: {
-    ".(ts|tsx)": "ts-jest",
+    ".(ts|tsx)$": require.resolve("ts-jest/dist"),
+    ".(js|jsx)$": require.resolve("babel-jest"), // jest's default
   },
 };

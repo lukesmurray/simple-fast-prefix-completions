@@ -1,17 +1,22 @@
 import { binarySearchLeftmost, binarySearchRightmost } from "./binarySearch";
 
-export class SuffixArray {
+export class SimpleFastPrefixCompletions {
   public readonly string: string;
   public readonly wordStarts: number[];
   public readonly SEPARATOR: string;
 
   constructor(options: {
-    SEPARATOR: string;
+    SEPARATOR?: string;
     words?: string[];
     wordStarts?: number[];
     string?: string;
   }) {
-    const { SEPARATOR, words, wordStarts: cachedWordStarts, string } = options;
+    const {
+      SEPARATOR = "\u0001",
+      words,
+      wordStarts: cachedWordStarts,
+      string,
+    } = options;
 
     if (SEPARATOR.length !== 1) {
       // this can be removed by storing the separator length instead of assuming
@@ -115,7 +120,7 @@ export class SuffixArray {
 
   public static fromJSON(json: string) {
     const { string, array, SEPARATOR } = JSON.parse(json);
-    return new SuffixArray({
+    return new SimpleFastPrefixCompletions({
       SEPARATOR,
       wordStarts: array,
       string,
