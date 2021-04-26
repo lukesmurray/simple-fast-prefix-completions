@@ -2,24 +2,16 @@ import { binarySearchLeftmost, binarySearchRightmost } from "./binarySearch";
 
 export class SuffixArray {
   public readonly string: string;
-  public readonly array: number[];
+  public readonly wordStarts: number[];
   public readonly SEPARATOR: string;
-  public readonly wordStarts: Set<number>;
 
   constructor(options: {
     SEPARATOR: string;
     words?: string[];
-    array?: number[];
     wordStarts?: number[];
     string?: string;
   }) {
-    const {
-      SEPARATOR,
-      words,
-      array: cachedArray,
-      wordStarts,
-      string,
-    } = options;
+    const { SEPARATOR, words, wordStarts: cachedWordStarts, string } = options;
 
     if (SEPARATOR.length !== 1) {
       // this can be removed by storing the separator length instead of assuming
@@ -28,24 +20,17 @@ export class SuffixArray {
     }
 
     // handle the case where the data structure has been serialized
-    if (
-      cachedArray !== undefined &&
-      string !== undefined &&
-      wordStarts !== undefined
-    ) {
+    if (cachedWordStarts !== undefined && string !== undefined) {
       this.string = string;
-      this.array = cachedArray;
+      this.wordStarts = cachedWordStarts;
       this.SEPARATOR = SEPARATOR;
-      this.wordStarts = new Set(wordStarts);
     } else if (words !== undefined) {
+      // sort the words and create the data structure
       const wordsSorted = words.sort((a, b) => a.localeCompare(b));
-      // build the data structure based on a word list
-      this.wordStarts = new Set();
       this.string = "";
-      this.array = [];
+      this.wordStarts = [];
       for (let i = 0; i < wordsSorted.length; i++) {
-        this.wordStarts.add(this.string.length);
-        this.array.push(this.string.length);
+        this.wordStarts.push(this.string.length);
         // prefix each word with the SEPARATOR
         this.string += SEPARATOR + words[i];
         if ((words[i] + "").length === 0) {
@@ -55,16 +40,6 @@ export class SuffixArray {
       // Suffix the array with a separator
       this.string += SEPARATOR;
 
-      // // since all searches are prefixed with separator throw out any suffixes
-      // // which don't start with the separator
-      // const nonSeparatorSuffix = array.findIndex(
-      //   (s) => this.string.charAt(s) !== SEPARATOR
-      // );
-      // if (nonSeparatorSuffix !== -1) {
-      //   this.array = array.slice(0, nonSeparatorSuffix);
-      // } else {
-      //   this.array = array;
-      // }
       this.SEPARATOR = SEPARATOR;
     } else {
       throw new Error("Either pass words or all necessary properties");
@@ -73,7 +48,7 @@ export class SuffixArray {
 
   private suffixArrayLeftMostPrefixMatch(target: string) {
     return binarySearchLeftmost(
-      this.array,
+      this.wordStarts,
       target,
       this.suffixArrayPrefixCmpFunc()
     );
@@ -81,7 +56,7 @@ export class SuffixArray {
 
   private suffixArrayRightMostPrefixMatch(target: string) {
     return binarySearchRightmost(
-      this.array,
+      this.wordStarts,
       target,
       this.suffixArrayPrefixCmpFunc()
     );
@@ -112,16 +87,11 @@ export class SuffixArray {
     const separatorPrefix = this.SEPARATOR + prefix;
     const left = this.suffixArrayLeftMostPrefixMatch(separatorPrefix);
     const right = this.suffixArrayRightMostPrefixMatch(separatorPrefix);
-    return this.array.slice(left, right + 1);
+    return this.wordStarts.slice(left, right + 1);
   }
 
   private findWordIndices(prefix: string) {
-    return (
-      this.findSuffixIndices(prefix)
-        .filter((s) => this.wordStarts.has(s))
-        // add 1 to each string index to black box the separator prefix
-        .map((i) => i + 1)
-    );
+    return this.findSuffixIndices(prefix).map((i) => i + 1);
   }
 
   public findWords(prefix: string) {
@@ -138,19 +108,17 @@ export class SuffixArray {
   public toJSON() {
     return {
       string: this.string,
-      array: this.array,
+      array: this.wordStarts,
       SEPARATOR: this.SEPARATOR,
-      wordStarts: [...this.wordStarts],
     };
   }
 
   public fromJSON(json: string) {
-    const { string, array, SEPARATOR, wordStarts } = JSON.parse(json);
+    const { string, array, SEPARATOR } = JSON.parse(json);
     return new SuffixArray({
       SEPARATOR,
-      array,
+      wordStarts: array,
       string,
-      wordStarts,
     });
   }
 }
