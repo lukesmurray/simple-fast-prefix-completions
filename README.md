@@ -2,6 +2,7 @@
 
 ![npm bundle size](https://img.shields.io/bundlephobia/minzip/simple-fast-prefix-completions)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/lukesmurray/simple-fast-prefix-completions/CI)
+![Coveralls](https://img.shields.io/coveralls/github/lukesmurray/simple-fast-prefix-completions)
 
 This package implements simple and fast prefix completions in javascript.
 In the future the package will support top K completions.
