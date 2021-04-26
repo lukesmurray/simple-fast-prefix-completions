@@ -50,7 +50,17 @@ export class SuffixArray {
       // Suffix the array with a separator
       this.string += SEPARATOR;
       const { array } = new SuffixArray_(this.string);
-      this.array = array;
+
+      // since all searches are prefixed with separator throw out any suffixes
+      // which don't start with the separator
+      const nonSeparatorSuffix = array.findIndex(
+        (s) => this.string.charAt(s) !== SEPARATOR
+      );
+      if (nonSeparatorSuffix !== -1) {
+        this.array = array.slice(0, nonSeparatorSuffix);
+      } else {
+        this.array = array;
+      }
       this.SEPARATOR = SEPARATOR;
     } else {
       throw new Error("Either pass words or all necessary properties");

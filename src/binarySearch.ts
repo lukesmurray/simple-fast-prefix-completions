@@ -5,7 +5,7 @@ export function binarySearchLeftmost<A, T>(
 ) {
   const n = array.length;
   let lo = 0;
-  let hi = n - 1;
+  let hi = n;
   while (lo < hi) {
     const mid = Math.floor((lo + hi) / 2);
     const cmpResult = cmp(array[mid], target);
@@ -25,7 +25,7 @@ export function binarySearchRightmost<A, T>(
 ) {
   const n = array.length;
   let lo = 0;
-  let hi = n - 1;
+  let hi = n;
   while (lo < hi) {
     const mid = Math.floor((lo + hi) / 2);
     const cmpResult = cmp(array[mid], target);
