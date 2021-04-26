@@ -3,7 +3,7 @@ import { SuffixArray } from "../src";
 const SEPARATOR = "\u0001";
 
 describe("suffix", () => {
-  it("suffixes", () => {
+  it("finds the correct suffixes", () => {
     const words = ["so", "soap", "soupy", "soapy"];
     const sa = new SuffixArray({ SEPARATOR, words });
     expect(sa.findWords("s")).toEqual(["so", "soap", "soapy", "soupy"]);
@@ -13,6 +13,12 @@ describe("suffix", () => {
     expect(sa.findWords("soap")).toEqual(["soap", "soapy"]);
     expect(sa.findWords("soapy")).toEqual(["soapy"]);
     expect(sa.findWords("a")).toEqual([]);
-    expect(sa.findWords("")).toEqual(["so", "soap", "soupy", "soapy"]);
+    expect(sa.findWords("")).toEqual(["so", "soap", "soapy", "soupy"]);
+  });
+
+  it("finds the correct left prefix", () => {
+    const words = ["so", "soap", "soupy", "soapy"];
+    const sa = new SuffixArray({ SEPARATOR, words });
+    expect(sa.findWords("soap")).toEqual(["soap", "soapy"]);
   });
 });

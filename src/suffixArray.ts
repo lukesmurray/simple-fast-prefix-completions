@@ -70,7 +70,11 @@ export class SuffixArray {
     // simply compares the characters from the suffix start to the target length
     return (suffixStart: number, target: string) => {
       const suffixEnd = suffixStart + target.length;
-      const suffix = this.string.slice(suffixStart, suffixEnd);
+      let suffix = this.string.slice(suffixStart, suffixEnd);
+      const separatorIndex = suffix.indexOf(this.SEPARATOR);
+      if (separatorIndex !== -1) {
+        suffix = suffix.substring(0, separatorIndex);
+      }
       return suffix.localeCompare(target);
     };
   }
@@ -86,9 +90,14 @@ export class SuffixArray {
   }
 
   public findWords(prefix: string) {
-    return this.findWordIndices(prefix).map((i) =>
-      this.string.substring(i, this.string.indexOf(this.SEPARATOR, i))
-    );
+    return this.findWordIndices(prefix).map((i) => {
+      const separatorIndex = this.string.indexOf(this.SEPARATOR, i);
+      if (separatorIndex !== -1) {
+        return this.string.substring(i, separatorIndex);
+      } else {
+        return this.string.substring(i);
+      }
+    });
   }
 
   public toJSON() {
