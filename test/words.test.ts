@@ -38,4 +38,15 @@ describe("suffix", () => {
   it("finds the correct suffixes for zzzzzzzzzzzzzzz", () => {
     expect(sa.findWords("zzzzzzzzzzzzzzz")).toEqual([]);
   });
+
+  it("serializes", () => {
+    const serializedSA = sa.toJSON();
+    const deserializedSA = SuffixArray.fromJSON(serializedSA);
+    expect(deserializedSA.findWords("console")).toEqual([
+      "console",
+      "consoled",
+      "consoler",
+      "consoles",
+    ]);
+  });
 });

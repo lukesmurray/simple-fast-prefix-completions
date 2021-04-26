@@ -26,7 +26,7 @@ One of the tests isn't working
 
 ~~Add a sentinel to the start of each word~~
 
-Currently the algorithm isn't working because the underlying suffix tree isn't correctly lexographically sorted. Need to debug.
+~~Currently the algorithm isn't working because the underlying suffix tree isn't correctly lexographically sorted. Need to debug.~~
 
 Solving top k
 
@@ -36,3 +36,8 @@ Solving top k
 - interval range maximum query
 
 - could potentially split into higher and lower priority
+
+# Range Maximum Query
+
+Divide array into blocks of size `(log n) / 4`.
+The minimum for each block can be computed in `O(n)` time and stored in a new array.

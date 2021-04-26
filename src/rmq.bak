@@ -1,0 +1,52 @@
+export class RMQ {
+  /**
+   * the block size for the minimums
+   */
+  private blockSize: number;
+  /**
+   * the underlying data being ranked
+   */
+  private ranking: number[];
+  /**
+   * the minimums for each block (comes from indices)
+   */
+  private minimums: number[];
+  /**
+   * the indices being ranked
+   */
+  private indices: number[];
+
+  constructor(ranking: number[], indices?: number[]) {
+    if (indices === undefined) {
+      indices = ranking.map((_, i) => i);
+    }
+    this.indices = indices
+    this.blockSize = Math.max(Math.floor(Math.log2(indices.length)), 2);
+    this.ranking = ranking;
+    let currentBlock = 0;
+    this.minimums = [];
+
+    for (let i = 0; i < indices.length; i++) {
+      let index = this.indices[i]
+      if (i > 0 && i % this.blockSize === 0) {
+        currentBlock += 1;
+      }
+
+      if (this.minimums.length <= currentBlock) {
+        this.minimums.push(index);
+      } else {
+        if (this.ranking[index] < this.ranking[this.minimums[currentBlock]]) {
+          this.minimums[currentBlock] = index;
+        }
+      }
+    }
+  }
+
+  private minimum(start: number, stop: number) {
+    const startBlock = Math.floor(start/ this.blockSize)
+    const endBlock = Math.floor(start/ this.blockSize)
+    for (let i = startBlock; i < endBlock) {
+      
+    }
+  }
+}

@@ -12,15 +12,35 @@ const perfObserver = new PerformanceObserver((items) => {
 
 perfObserver.observe({ entryTypes: ["measure"], buffered: true });
 
-performance.mark("Begin building suffix array");
+performance.mark("begin building suffix array");
 const sa = new SuffixArray({ SEPARATOR, words });
 performance.mark("Finish building suffix array");
-console.log("suffix array num words", words.length);
-console.log("suffix array string length", sa.string.length);
 performance.measure(
   "Build Suffix Array",
   "Begin building suffix array",
   "Finish building suffix array"
+);
+
+console.log("suffix array num words", words.length);
+console.log("suffix array string length", sa.string.length);
+console.log("raw string length", words.join("").length);
+
+performance.mark("begin serialize suffix array");
+const serializedSA = sa.toJSON();
+performance.mark("end serialize suffix array");
+performance.measure(
+  "serialize suffix array",
+  "begin serialize suffix array",
+  "end serialize suffix array"
+);
+
+performance.mark("begin deserialize suffix array");
+SuffixArray.fromJSON(serializedSA);
+performance.mark("end deserialize suffix array");
+performance.measure(
+  "deserialize suffix array",
+  "begin deserialize suffix array",
+  "end deserialize suffix array"
 );
 
 for (let needle of [

@@ -106,14 +106,14 @@ export class SuffixArray {
   }
 
   public toJSON() {
-    return {
+    return JSON.stringify({
       string: this.string,
       array: this.wordStarts,
       SEPARATOR: this.SEPARATOR,
-    };
+    });
   }
 
-  public fromJSON(json: string) {
+  public static fromJSON(json: string) {
     const { string, array, SEPARATOR } = JSON.parse(json);
     return new SuffixArray({
       SEPARATOR,
