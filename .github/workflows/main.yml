@@ -1,14 +1,13 @@
 name: CI
-on: [push]
+on: [push, pull_request]
 jobs:
   build:
-    name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
+    name: Build, lint, and test on Node ${{ matrix.node }}
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         node: ['10.x', '12.x', '14.x']
-        os: [ubuntu-latest, windows-latest, macOS-latest]
 
     steps:
       - name: Checkout repo
@@ -30,3 +29,20 @@ jobs:
 
       - name: Build
         run: yarn build
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: run-${{ matrix.node }}
+          parallel: true
+
+  finish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        parallel-finished: true
