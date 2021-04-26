@@ -1,8 +1,9 @@
 # Simple Fast Prefix Completions
 
-![npm bundle size](https://img.shields.io/bundlephobia/minzip/simple-fast-prefix-completions)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/lukesmurray/simple-fast-prefix-completions/CI)
-![Coveralls](https://img.shields.io/coveralls/github/lukesmurray/simple-fast-prefix-completions)
+[![npm](https://img.shields.io/npm/v/simple-fast-prefix-completions)](https://www.npmjs.com/package/simple-fast-prefix-completions)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/simple-fast-prefix-completions)](https://www.npmjs.com/package/simple-fast-prefix-completions)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/lukesmurray/simple-fast-prefix-completions/CI)](https://github.com/lukesmurray/simple-fast-prefix-completions)
+[![Coverage Status](https://coveralls.io/repos/github/lukesmurray/simple-fast-prefix-completions/badge.svg?branch=main)](https://coveralls.io/github/lukesmurray/simple-fast-prefix-completions?branch=main)
 
 This package implements simple and fast prefix completions in javascript.
 In the future the package will support top K completions.
