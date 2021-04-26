@@ -4,8 +4,8 @@ import { words } from "./words";
 
 const SEPARATOR = "\u0001";
 
-const perfObserver = new PerformanceObserver((items) => {
-  items.getEntries().forEach((entry) => {
+const perfObserver = new PerformanceObserver(items => {
+  items.getEntries().forEach(entry => {
     console.log(entry);
   });
 });
@@ -56,7 +56,7 @@ for (let needle of [
   "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
   "a",
   "b",
-  "c",
+  "c"
 ]) {
   performance.mark(`Begin searching for ${needle}`);
   sa.findWords(needle);

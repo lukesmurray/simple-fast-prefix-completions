@@ -12,7 +12,7 @@ describe("suffix", () => {
       "cherubic",
       "cherubically",
       "cherubim",
-      "cherubs",
+      "cherubs"
     ]);
   });
 
@@ -22,7 +22,7 @@ describe("suffix", () => {
       "chessboard",
       "chessboards",
       "chessman",
-      "chessmen",
+      "chessmen"
     ]);
   });
 
@@ -31,7 +31,7 @@ describe("suffix", () => {
       "console",
       "consoled",
       "consoler",
-      "consoles",
+      "consoles"
     ]);
   });
 
@@ -46,7 +46,7 @@ describe("suffix", () => {
       "console",
       "consoled",
       "consoler",
-      "consoles",
+      "consoles"
     ]);
   });
 });

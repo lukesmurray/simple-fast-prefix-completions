@@ -15,7 +15,7 @@ export class SimpleFastPrefixCompletions {
       SEPARATOR = "\u0001",
       words,
       wordStarts: cachedWordStarts,
-      string,
+      string
     } = options;
 
     if (SEPARATOR.length !== 1) {
@@ -96,11 +96,11 @@ export class SimpleFastPrefixCompletions {
   }
 
   private findWordIndices(prefix: string) {
-    return this.findSuffixIndices(prefix).map((i) => i + 1);
+    return this.findSuffixIndices(prefix).map(i => i + 1);
   }
 
   public findWords(prefix: string) {
-    return this.findWordIndices(prefix).map((i) => {
+    return this.findWordIndices(prefix).map(i => {
       const separatorIndex = this.string.indexOf(this.SEPARATOR, i);
       if (separatorIndex !== -1) {
         return this.string.substring(i, separatorIndex);
@@ -114,7 +114,7 @@ export class SimpleFastPrefixCompletions {
     return JSON.stringify({
       string: this.string,
       array: this.wordStarts,
-      SEPARATOR: this.SEPARATOR,
+      SEPARATOR: this.SEPARATOR
     });
   }
 
@@ -123,7 +123,7 @@ export class SimpleFastPrefixCompletions {
     return new SimpleFastPrefixCompletions({
       SEPARATOR,
       wordStarts: array,
-      string,
+      string
     });
   }
 }

@@ -38,7 +38,7 @@ describe("suffix", () => {
     expect(completions.findWords("se")).toEqual([
       "seashells",
       "seashore",
-      "sells",
+      "sells"
     ]);
   });
 });
