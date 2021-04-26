@@ -1,4 +1,3 @@
-import { default as SuffixArray_ } from "mnemonist/suffix-array";
 import { binarySearchLeftmost, binarySearchRightmost } from "./binarySearch";
 
 export class SuffixArray {
@@ -39,11 +38,14 @@ export class SuffixArray {
       this.SEPARATOR = SEPARATOR;
       this.wordStarts = new Set(wordStarts);
     } else if (words !== undefined) {
+      const wordsSorted = words.sort((a, b) => a.localeCompare(b));
       // build the data structure based on a word list
       this.wordStarts = new Set();
       this.string = "";
-      for (let i = 0; i < words.length; i++) {
+      this.array = [];
+      for (let i = 0; i < wordsSorted.length; i++) {
         this.wordStarts.add(this.string.length);
+        this.array.push(this.string.length);
         // prefix each word with the SEPARATOR
         this.string += SEPARATOR + words[i];
         if ((words[i] + "").length === 0) {
@@ -52,25 +54,24 @@ export class SuffixArray {
       }
       // Suffix the array with a separator
       this.string += SEPARATOR;
-      const { array } = new SuffixArray_(this.string);
 
-      // since all searches are prefixed with separator throw out any suffixes
-      // which don't start with the separator
-      const nonSeparatorSuffix = array.findIndex(
-        (s) => this.string.charAt(s) !== SEPARATOR
-      );
-      if (nonSeparatorSuffix !== -1) {
-        this.array = array.slice(0, nonSeparatorSuffix);
-      } else {
-        this.array = array;
-      }
+      // // since all searches are prefixed with separator throw out any suffixes
+      // // which don't start with the separator
+      // const nonSeparatorSuffix = array.findIndex(
+      //   (s) => this.string.charAt(s) !== SEPARATOR
+      // );
+      // if (nonSeparatorSuffix !== -1) {
+      //   this.array = array.slice(0, nonSeparatorSuffix);
+      // } else {
+      //   this.array = array;
+      // }
       this.SEPARATOR = SEPARATOR;
     } else {
       throw new Error("Either pass words or all necessary properties");
     }
   }
 
-  public suffixArrayLeftMostPrefixMatch(target: string) {
+  private suffixArrayLeftMostPrefixMatch(target: string) {
     return binarySearchLeftmost(
       this.array,
       target,
@@ -78,18 +79,18 @@ export class SuffixArray {
     );
   }
 
-  public suffixArrayRightMostPrefixMatch(target: string) {
+  private suffixArrayRightMostPrefixMatch(target: string) {
     return binarySearchRightmost(
       this.array,
       target,
-      this.suffixArrayPrefixCmpFunc(true)
+      this.suffixArrayPrefixCmpFunc()
     );
   }
 
   /**
    * Create a comparison function which has a closure over the suffix array
    */
-  private suffixArrayPrefixCmpFunc(log = false) {
+  private suffixArrayPrefixCmpFunc() {
     // compare an element from the SuffixArray.array to a target string
     // the element is an index in the SuffixArray.string
     // simply compares the characters from the suffix start to the target length
@@ -102,15 +103,6 @@ export class SuffixArray {
       const endSeparatorIndex = suffix.indexOf(this.SEPARATOR, 1);
       if (endSeparatorIndex !== -1) {
         suffix = suffix.substring(0, endSeparatorIndex);
-      }
-      if (log) {
-        console.log(
-          this.string.slice(
-            suffixStart,
-            this.string.indexOf(this.SEPARATOR, suffixStart + 1)
-          ),
-          target
-        );
       }
       return suffix.localeCompare(target);
     };

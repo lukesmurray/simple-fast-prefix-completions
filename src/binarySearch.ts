@@ -29,7 +29,6 @@ export function binarySearchRightmost<A, T>(
   while (lo < hi) {
     const mid = Math.floor((lo + hi) / 2);
     const cmpResult = cmp(array[mid], target);
-    console.log(lo, mid, hi, cmpResult);
     if (cmpResult > 0) {
       hi = mid;
     } else {

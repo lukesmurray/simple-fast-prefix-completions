@@ -23,3 +23,26 @@ performance.measure(
   "Begin building suffix array",
   "Finish building suffix array"
 );
+
+for (let needle of [
+  "the",
+  "quick",
+  "brown",
+  "fox",
+  "jumped",
+  "over",
+  "the",
+  "lazy",
+  "dog",
+  "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+]) {
+  performance.mark(`Begin searching for ${needle}`);
+  sa.findWords(needle);
+  performance.mark(`Finish searching for ${needle}`);
+
+  performance.measure(
+    `Search for ${needle}`,
+    `Begin searching for ${needle}`,
+    `Finish searching for ${needle}`
+  );
+}
