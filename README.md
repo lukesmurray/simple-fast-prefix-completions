@@ -10,6 +10,8 @@ In the future the package will support top K completions.
 
 ## Usage
 
+_[Observable Example](https://observablehq.com/@lukesmurray/simple-fast-prefix-completions)_
+
 ```tsx
 import { SimpleFastPrefixCompletions } from "simple-fast-prefix-completions";
 
