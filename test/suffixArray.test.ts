@@ -1,6 +1,7 @@
 import { SuffixArray } from "../src";
 
-const SEPARATOR = "\u0001";
+// const SEPARATOR = "\u0001";
+const SEPARATOR = "$";
 
 describe("suffix", () => {
   it("finds the correct suffixes", () => {
@@ -20,5 +21,11 @@ describe("suffix", () => {
     const words = ["so", "soap", "soupy", "soapy"];
     const sa = new SuffixArray({ SEPARATOR, words });
     expect(sa.findWords("soap")).toEqual(["soap", "soapy"]);
+  });
+
+  it("works with separator prefixes", () => {
+    const words = [`so`, `soap`, `soupy`, `soapy`];
+    const sa = new SuffixArray({ SEPARATOR, words });
+    expect(sa.findWords(`soap`)).toEqual([`soap`, `soapy`]);
   });
 });

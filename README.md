@@ -24,7 +24,7 @@ We may be able to fix by iterating through the word in the leftmost match until 
 
 One of the tests isn't working
 
-Add a sentinel to the start of each word
+~~Add a sentinel to the start of each word~~
 
 Solving top k
 

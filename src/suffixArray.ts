@@ -21,6 +21,14 @@ export class SuffixArray {
       wordStarts,
       string,
     } = options;
+
+    if (SEPARATOR.length !== 1) {
+      // this can be removed by storing the separator length instead of assuming
+      // that it has length 1 but at least prevent the user from creating errors
+      throw new Error("Separator must have a length of 1");
+    }
+
+    // handle the case where the data structure has been serialized
     if (
       cachedArray !== undefined &&
       string !== undefined &&
@@ -31,12 +39,16 @@ export class SuffixArray {
       this.SEPARATOR = SEPARATOR;
       this.wordStarts = new Set(wordStarts);
     } else if (words !== undefined) {
+      // build the data structure based on a word list
       this.wordStarts = new Set();
       this.string = "";
       for (let i = 0; i < words.length; i++) {
         this.wordStarts.add(this.string.length);
-        this.string += words[i] + SEPARATOR;
+        // prefix each word with the SEPARATOR
+        this.string += SEPARATOR + words[i];
       }
+      // Suffix the array with a separator
+      this.string += SEPARATOR;
       const { array } = new SuffixArray_(this.string);
       this.array = array;
       this.SEPARATOR = SEPARATOR;
@@ -71,22 +83,31 @@ export class SuffixArray {
     return (suffixStart: number, target: string) => {
       const suffixEnd = suffixStart + target.length;
       let suffix = this.string.slice(suffixStart, suffixEnd);
-      const separatorIndex = suffix.indexOf(this.SEPARATOR);
-      if (separatorIndex !== -1) {
-        suffix = suffix.substring(0, separatorIndex);
+
+      // find the end word boundary, we start at the 1 index to skip the prefix
+      // separator
+      const endSeparatorIndex = suffix.indexOf(this.SEPARATOR, 1);
+      if (endSeparatorIndex !== -1) {
+        suffix = suffix.substring(0, endSeparatorIndex);
       }
       return suffix.localeCompare(target);
     };
   }
 
   private findSuffixIndices(prefix: string) {
-    const left = this.suffixArrayLeftMostPrefixMatch(prefix);
-    const right = this.suffixArrayRightMostPrefixMatch(prefix);
+    const separatorPrefix = this.SEPARATOR + prefix;
+    const left = this.suffixArrayLeftMostPrefixMatch(separatorPrefix);
+    const right = this.suffixArrayRightMostPrefixMatch(separatorPrefix);
     return this.array.slice(left, right + 1);
   }
 
   private findWordIndices(prefix: string) {
-    return this.findSuffixIndices(prefix).filter((s) => this.wordStarts.has(s));
+    return (
+      this.findSuffixIndices(prefix)
+        .filter((s) => this.wordStarts.has(s))
+        // add 1 to each string index to black box the separator prefix
+        .map((i) => i + 1)
+    );
   }
 
   public findWords(prefix: string) {
