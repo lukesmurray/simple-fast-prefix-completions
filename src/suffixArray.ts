@@ -46,6 +46,9 @@ export class SuffixArray {
         this.wordStarts.add(this.string.length);
         // prefix each word with the SEPARATOR
         this.string += SEPARATOR + words[i];
+        if ((words[i] + "").length === 0) {
+          throw new Error(`invalid word, ${i}`);
+        }
       }
       // Suffix the array with a separator
       this.string += SEPARATOR;
@@ -67,7 +70,7 @@ export class SuffixArray {
     }
   }
 
-  private suffixArrayLeftMostPrefixMatch(target: string) {
+  public suffixArrayLeftMostPrefixMatch(target: string) {
     return binarySearchLeftmost(
       this.array,
       target,
@@ -75,18 +78,18 @@ export class SuffixArray {
     );
   }
 
-  private suffixArrayRightMostPrefixMatch(target: string) {
+  public suffixArrayRightMostPrefixMatch(target: string) {
     return binarySearchRightmost(
       this.array,
       target,
-      this.suffixArrayPrefixCmpFunc()
+      this.suffixArrayPrefixCmpFunc(true)
     );
   }
 
   /**
    * Create a comparison function which has a closure over the suffix array
    */
-  private suffixArrayPrefixCmpFunc() {
+  private suffixArrayPrefixCmpFunc(log = false) {
     // compare an element from the SuffixArray.array to a target string
     // the element is an index in the SuffixArray.string
     // simply compares the characters from the suffix start to the target length
@@ -99,6 +102,15 @@ export class SuffixArray {
       const endSeparatorIndex = suffix.indexOf(this.SEPARATOR, 1);
       if (endSeparatorIndex !== -1) {
         suffix = suffix.substring(0, endSeparatorIndex);
+      }
+      if (log) {
+        console.log(
+          this.string.slice(
+            suffixStart,
+            this.string.indexOf(this.SEPARATOR, suffixStart + 1)
+          ),
+          target
+        );
       }
       return suffix.localeCompare(target);
     };

@@ -26,6 +26,8 @@ One of the tests isn't working
 
 ~~Add a sentinel to the start of each word~~
 
+Currently the algorithm isn't working because the underlying suffix tree isn't correctly lexographically sorted. Need to debug.
+
 Solving top k
 
 - we want range maximum for a range
