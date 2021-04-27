@@ -45,18 +45,17 @@ The completion object takes `O(c + n)` space where `c` is the number of characte
 
 Solving Top K
 
-- create a range maximum query for the array
-- once we find the maximum for any range we split
-  - find largest in either two sides
-- top K is then `O(k * log n)`
-
-Avoiding large lists in top k
-
-- could potentially split into higher and lower priority
-- under the hood the data is stored as a concatenated string
-- trick is to have one string for the short tail and another string for the long tail
-
-# Range Maximum Query
-
-Divide array into blocks of size `(log n) / 4`.
-The minimum for each block can be computed in `O(n)` time and stored in a new array.
+- create a range maximum query for the array using a split data structure with unprocessed blocks on the bottom and a sparse table at the top
+  - block size log n
+  - sparse table for top level
+  - no preprocessing for each block
+  - query time is log n
+  - top k query in k log n
+  - check out these slides http://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/00/Small00.pdf
+  - video on sparse tables https://www.youtube.com/watch?v=uUatD9AudXo
+  - once we find the maximum for any range we split the range into two and store the two sub ranges in a priority Q
+  - the rmq is a function rmq(a, b) which returns the index of the minimum value in the range (a, b).
+- Avoiding large lists in top k
+  - could potentially split into higher and lower priority
+  - under the hood the data is stored as a concatenated string
+  - trick is to have one string for the short tail and another string for the long tail
