@@ -8,6 +8,36 @@
 This package implements simple and fast prefix completions in javascript.
 Given a large list of words this package can rapidly perform a prefix search and return either all the words matching a given prefix in alphabetical order or the top k words matching a given prefix ordered by a numerical ranking key. The package also supports mapping words to unique ids.
 
+```tsx
+import { SimpleFastPrefixCompletions } from "simple-fast-prefix-completions";
+
+const wordsWithIds = [
+  ["sally", 0],
+  ["sells", 1],
+  ["seashells", 2],
+  ["by", 3],
+  ["the", 4],
+  ["seashore", 5],
+];
+const completions = new SimpleFastPrefixCompletions({
+  wordsWithIds,
+});
+
+// search by prefix returns prefixes in lexicographically sorted order
+console.log(completions.findWordsWithIds("se"));
+// [["seashells", 2], ["seashore", 5], ["sells", 1]]
+
+// note you can still use other methods which do not depend on ids
+console.log(completions.findWords("se"));
+// ["seashells", "seashore", "sells"]
+
+// serialize to json
+const serialized = completions.toJSON();
+
+// deserialize from json
+const deserialized = SimpleFastPrefixCompletions.fromJSON(serialized);
+```
+
 ## Usage
 
 _[Observable Example for Prefix Completions](https://observablehq.com/@lukesmurray/simple-fast-prefix-completions)_
@@ -65,38 +95,6 @@ const completions = new SimpleFastPrefixCompletions({
 const serialized = completions.toJSON();
 
 // deserialize from json string
-const deserialized = SimpleFastPrefixCompletions.fromJSON(serialized);
-```
-
-### End to End Example
-
-```tsx
-import { SimpleFastPrefixCompletions } from "simple-fast-prefix-completions";
-
-const wordsWithIds = [
-  ["sally", 0],
-  ["sells", 1],
-  ["seashells", 2],
-  ["by", 3],
-  ["the", 4],
-  ["seashore", 5],
-];
-const completions = new SimpleFastPrefixCompletions({
-  wordsWithIds,
-});
-
-// search by prefix returns prefixes in lexicographically sorted order
-console.log(completions.findWordsWithIds("se"));
-// [["seashells", 2], ["seashore", 5], ["sells", 1]]
-
-// note you can still use other methods which do not depend on ids
-console.log(completions.findWords("se"));
-// ["seashells", "seashore", "sells"]
-
-// serialize to json
-const serialized = completions.toJSON();
-
-// deserialize from json
 const deserialized = SimpleFastPrefixCompletions.fromJSON(serialized);
 ```
 
