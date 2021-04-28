@@ -22,7 +22,6 @@ performance.measure(
 );
 
 console.log("suffix array num words", words.length);
-console.log("suffix array string length", sa.string.length);
 console.log("raw string length", words.join("").length);
 
 performance.mark("begin serialize suffix array");

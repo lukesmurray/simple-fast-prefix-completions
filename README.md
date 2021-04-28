@@ -6,21 +6,90 @@
 [![Coverage Status](https://coveralls.io/repos/github/lukesmurray/simple-fast-prefix-completions/badge.svg?branch=main)](https://coveralls.io/github/lukesmurray/simple-fast-prefix-completions?branch=main)
 
 This package implements simple and fast prefix completions in javascript.
-In the future the package will support top K completions.
+Given a large list of words this package can rapidly perform a prefix search and return either all the words matching a given prefix in alphabetical order or the top k words matching a given prefix ordered by a numerical ranking key. The package also supports mapping words to unique ids.
 
 ## Usage
 
-_[Observable Example](https://observablehq.com/@lukesmurray/simple-fast-prefix-completions)_
+_[Observable Example for Prefix Completions](https://observablehq.com/@lukesmurray/simple-fast-prefix-completions)_
+
+_[Observable Example for Top-K Completions](https://observablehq.com/@lukesmurray/simple-fast-top-k-completions)_
+
+### Construction
+
+You can create the completion datastructure by passing one of the following options to the constructor `words`, `wordsWithIds`, `rankedWords`, `rankedWordsWithIds`.
+The package makes no assumptions about your ids. They can be strings, numbers, objects, basically anything you want.
+If you want to be able to serialize the datastructure your ids must be serializable though.
+
+The rankings are assumed to be ordered such that lower rankings come before higher rankings.
+
+`words` - expects an array of strings `["sally", "sells", "seashells"]`
+
+`wordsWithIds` - expects an array of `[string, id]` tuples. `[["sally", 50], ["sells", 30], ["seashells", 25]]`
+
+`rankedWords` - expects an array of `[string, number]` tuples. The number is a ranking. `[["sally", 0], ["sells", 1], ["seashells", 2]]`
+
+`rankedWordsWithIds` - expects an array of `[string, number, id]` tuples. The number is a ranking and the id is the id. `[["sally", 0, 50], ["sells", 1, 30], ["seashells", 2, 25]]`
+
+```tsx
+// example using the words option
+const words = ["sally", "sells", "seashells"];
+const completions = new SimpleFastPrefixCompletions({
+  words,
+});
+```
+
+### Querying
+
+The datastructure exposes four methods for querying data.
+
+`findWords(prefix): string[]` - takes a prefix and returns words which start with that prefix in alphabetical order
+
+`findWordsWithIds(prefix): [string, id][]` - takes a prefix and returns words which start with that prefix in alphabetical order and their associated ids
+
+`findTopKWords(prefix, k): [string][]` - takes a prefix and a number `k` and returns the top k words which start with that prefix ordered by the passed in ranking
+
+`findTopKWordsWithIds(prefix, k): [string, id][]` - takes a prefix and a number `k` and returns the top k words which start with that prefix ordered by the passed in ranking along with the ids associated with each word
+
+If you call a method and have not provided data the method needs then the method will error. For example if you passed `words` and query for `findWordsWithIds` you will get an error since you have not provided `ids`.
+
+### Serializing
+
+You can save time building the datastructure by building the datastructure once and then serializing it with `toJSON` and `fromJSON`
+
+```tsx
+const words = ["sally", "sells", "seashells"];
+const completions = new SimpleFastPrefixCompletions({
+  words,
+});
+// serialize to json string
+const serialized = completions.toJSON();
+
+// deserialize from json string
+const deserialized = SimpleFastPrefixCompletions.fromJSON(serialized);
+```
+
+### End to End Example
 
 ```tsx
 import { SimpleFastPrefixCompletions } from "simple-fast-prefix-completions";
 
-const words = ["sally", "sells", "seashells", "by", "the", "seashore"];
+const wordsWithIds = [
+  ["sally", 0],
+  ["sells", 1],
+  ["seashells", 2],
+  ["by", 3],
+  ["the", 4],
+  ["seashore", 5],
+];
 const completions = new SimpleFastPrefixCompletions({
-  words,
+  wordsWithIds,
 });
 
 // search by prefix returns prefixes in lexicographically sorted order
+console.log(completions.findWordsWithIds("se"));
+// [["seashells", 2], ["seashore", 5], ["sells", 1]]
+
+// note you can still use other methods which do not depend on ids
 console.log(completions.findWords("se"));
 // ["seashells", "seashore", "sells"]
 
@@ -31,33 +100,25 @@ const serialized = completions.toJSON();
 const deserialized = SimpleFastPrefixCompletions.fromJSON(serialized);
 ```
 
-## Runtime and Space Constraints
+### Separator
 
-Given a dataset of `n` words and a prefix of length `p`.
+Internally the datastructure concatenates all your strings together separated by a single character sentinel `\u0001`.
+If this character is in your dataset you can pass your own sentinel, just choose a single width character that is not in your dataset.
 
-Creating a new completion object from scratch takes `O(n log n) + O(n)` time.
+## Rough Approximation of Runtime and Space Constraints
 
-Finding the `m` matching completions for a prefix of length `p` takes `2 * O(p log n) + O(m)`.
+The memory consumed should be approximately `O(5n + c)` where `n` is the number of words provided and `c` is the concatenated length of all the words. `2n` for the segment tree, `n` for word starts, `c` for words concatenated into a single string, `n` for word ids, and `n` for word rankings.
 
-The completion object takes `O(c + n)` space where `c` is the number of characters in all the words and `n` is the number of words.
+The build time is approximately `O(n log n) + O(n)`.
 
-## TODO
+Query time to find `m` matches for prefix of length `p` is approximately `O(p log n) + O(m)`
 
-Solving Top K
+Query time to find `k` top-k matches for a prefix of length `p` is approximately `O(p log n) + O(k log k)`.
 
-- v2 construct a segment tree
-  - https://cp-algorithms.com/data_structures/segment_tree.html
-- create a range maximum query for the array using a split data structure with unprocessed blocks on the bottom and a sparse table at the top
-  - block size log n
-  - sparse table for top level
-  - no preprocessing for each block
-  - query time is log n
-  - top k query in k log n
-  - check out these slides http://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/00/Small00.pdf
-  - video on sparse tables https://www.youtube.com/watch?v=uUatD9AudXo
-  - once we find the maximum for any range we split the range into two and store the two sub ranges in a priority Q
-  - the rmq is a function rmq(a, b) which returns the index of the minimum value in the range (a, b).
-- Avoiding large lists in top k
-  - could potentially split into higher and lower priority
-  - under the hood the data is stored as a concatenated string
-  - trick is to have one string for the short tail and another string for the long tail
+## Internal Architecture
+
+Take the input words, sort them lexicographically, and concatenate them into a single string separated by `Separator`. While concatenating the strings build an array containing the offset into the string for the start of each word. When the user searches for a prefix, we binary search the array of offsets twice, finding the indices of the leftmost and rightmost offsets which match the prefix.
+
+The array of offsets is already sorted so if the user is simply searching for prefix matches we iterate over the array from the leftmost index to the rightmost index and return the words matching the prefix. To return a word we iterate from the start offset to the first instance of a `Separator`.
+
+To support top-k indices we build a SegmentTree over the indices of the sorted word array which can be used to query index of the minimum value for any interval in the word array. When we find our leftmost and rightmost indices we add the interval to a priority queue. While the queue is not empty we pop the interval associated with the lowest ranked term, and then add the left and right intervals to the queue.

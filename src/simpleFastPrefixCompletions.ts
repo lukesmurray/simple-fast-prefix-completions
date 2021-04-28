@@ -2,30 +2,32 @@ import { binarySearchLeftmost, binarySearchRightmost } from "./binarySearch";
 import PriorityQueue from "./priorityQueue";
 import { SegmentTree } from "./segmentTree";
 
-// if user wants topk
-// they pass in array of rankedWords
-// sort array of ranked words by the words
-
-export class SimpleFastPrefixCompletions {
-  public string: string;
-  public wordStarts: number[];
-  public SEPARATOR: string;
+export class SimpleFastPrefixCompletions<I> {
+  private string: string;
+  private wordStarts: number[];
+  private SEPARATOR: string;
 
   // only used in top k
-  public wordRankings?: number[];
-  public tree?: SegmentTree;
+  private wordRankings?: number[];
+  private tree?: SegmentTree;
+
+  // used for mapping words to ids
+  private wordIds?: I[];
 
   constructor(options: {
     SEPARATOR?: string;
     // pass an unranked list of words to get prefix completions
     words?: string[];
+    wordsWithIds?: [string, I][];
     // pass a ranked list of words [word, ranking][] to get top-k completions
     rankedWords?: [string, number][];
+    rankedWordsWithIds?: [string, number, I][];
     // remaining options passed in json deserialization
     wordStarts?: number[];
     string?: string;
     wordRankings?: number[];
     tree?: string;
+    wordIds?: I[];
   }) {
     const {
       SEPARATOR = "\u0001",
@@ -34,7 +36,10 @@ export class SimpleFastPrefixCompletions {
       string,
       rankedWords,
       tree: serializedTree,
-      wordRankings
+      wordRankings,
+      wordsWithIds,
+      rankedWordsWithIds,
+      wordIds
     } = options;
 
     // initialize properties
@@ -56,11 +61,20 @@ export class SimpleFastPrefixCompletions {
         this.wordRankings = wordRankings;
         this.tree = SegmentTree.fromJSON(serializedTree, this.treeCmpFunc());
       }
+      if (wordIds !== undefined) {
+        this.wordIds = wordIds;
+      }
     }
     // handle prefix completions case (passed words)
     else if (words !== undefined) {
       words.sort((a, b) => a.localeCompare(b));
       this.buildString(words, SEPARATOR, i => words[i]);
+    }
+    // handle prefix completion case (passed wordsWithIds)
+    else if (wordsWithIds !== undefined) {
+      wordsWithIds.sort((a, b) => a[0].localeCompare(b[0]));
+      this.wordIds = wordsWithIds.map(v => v[1]);
+      this.buildString(wordsWithIds, SEPARATOR, i => wordsWithIds[i][0]);
     }
     // handle top k completions case (passed rankedWords)
     else if (rankedWords !== undefined) {
@@ -69,6 +83,21 @@ export class SimpleFastPrefixCompletions {
       this.wordRankings = rankedWords.map(v => v[1]);
       this.tree = new SegmentTree({
         values: rankedWords.map((_, i) => i),
+        f: this.treeCmpFunc()
+      });
+    }
+    // handle top k completions with ids case (passed rankedWordsWithIds)
+    else if (rankedWordsWithIds !== undefined) {
+      rankedWordsWithIds.sort((a, b) => a[0].localeCompare(b[0]));
+      this.buildString(
+        rankedWordsWithIds,
+        SEPARATOR,
+        i => rankedWordsWithIds[i][0]
+      );
+      this.wordRankings = rankedWordsWithIds.map(v => v[1]);
+      this.wordIds = rankedWordsWithIds.map(v => v[2]);
+      this.tree = new SegmentTree({
+        values: rankedWordsWithIds.map((_, i) => i),
         f: this.treeCmpFunc()
       });
     } else {
@@ -140,123 +169,169 @@ export class SimpleFastPrefixCompletions {
     };
   }
 
-  public findWords(prefix: string) {
+  private getLeftAndRightForPrefix(prefix: string) {
     // prefix the prefix with a separator
     const separatorPrefix = this.SEPARATOR + prefix;
     // find the left and right indices in the word start array
     const left = this.leftMostPrefixMatchIndex(separatorPrefix);
     const right = this.rightMostPrefixMatchIndex(separatorPrefix) + 1;
+    return { left, right };
+  }
 
+  private getWordForIndex(idx: number): string {
+    const wordStartIdx = this.wordStarts[idx] + 1;
+    const wordEndIdx = this.string.indexOf(this.SEPARATOR, wordStartIdx);
+    if (wordEndIdx !== -1) {
+      return this.string.substring(wordStartIdx, wordEndIdx);
+    } else {
+      return this.string.substring(wordStartIdx);
+    }
+  }
+
+  public findWords(prefix: string) {
+    const { left, right } = this.getLeftAndRightForPrefix(prefix);
     if (left === right) {
       return [];
     }
-
-    // increment each word start by 1 to skip the separator
-    const wordIndices = this.wordStarts.slice(left, right).map(i => i + 1);
-
-    return wordIndices.map(wordStartIdx => {
-      // find the end of the word by searching for the first separator after
-      // the word start
-      const wordEndIdx = this.string.indexOf(this.SEPARATOR, wordStartIdx);
-      if (wordEndIdx !== -1) {
-        return this.string.substring(wordStartIdx, wordEndIdx);
-      } else {
-        return this.string.substring(wordStartIdx);
-      }
-    });
+    const words = [];
+    for (let i = left; i < right; i++) {
+      words.push(this.getWordForIndex(i));
+    }
+    return words;
   }
 
-  public findTopKWords(prefix: string, k: number) {
+  public findWordsWithIds(prefix: string) {
+    if (this.wordIds === undefined) {
+      throw new Error("word ids is undefined");
+    }
+    const { left, right } = this.getLeftAndRightForPrefix(prefix);
+    if (left === right) {
+      return [];
+    }
+    const wordsWithIds: [string, I][] = [];
+    for (let i = left; i < right; i++) {
+      wordsWithIds.push([this.getWordForIndex(i), this.wordIds[i]]);
+    }
+    return wordsWithIds;
+  }
+
+  private findTopKIndices(prefix: string, k: number) {
     if (this.tree === undefined) {
       throw new Error("tree is undefined");
     }
     if (this.wordRankings === undefined) {
       throw new Error("word rankings are undefined");
     }
-
-    // prefix the prefix with a separator
-    const separatorPrefix = this.SEPARATOR + prefix;
-    // find the left and right indices in the word start array
-    const left = this.leftMostPrefixMatchIndex(separatorPrefix);
-    const right = this.rightMostPrefixMatchIndex(separatorPrefix) + 1;
-
+    const { left, right } = this.getLeftAndRightForPrefix(prefix);
     if (left === right) {
       return [];
     }
 
-    // indices into ranking/word starts for min words found
+    // indices for top k words
     let foundIndices = [];
     // each interval is a map from an idx to an interval (left, right, idx)
     let intervalMap = new Map<number, [number, number, number]>();
     // create a priority queue for the intervals
     const queue = new PriorityQueue<number>();
 
+    // add the initial interval to the queue and map
     let firstMinIdx = this.tree.rangeQuery(left, right);
     intervalMap.set(firstMinIdx, [left, right, firstMinIdx]);
     queue.push(firstMinIdx, this.wordRankings[firstMinIdx]);
 
+    // while the queue is not empty and we haven't found all the terms
     while (!queue.isEmpty() && foundIndices.length < k) {
+      // pop the queue and get the associated interval
       const nextMinIdx = queue.pop()!;
       const [left, right] = intervalMap.get(nextMinIdx)!;
+
+      // add the new min to the found indices
       foundIndices.push(nextMinIdx);
 
-      // if the left interval is valid
+      // if the left interval is valid add it to the queue and map
       if (nextMinIdx > left) {
-        // find the idx of the min on the left side
         const leftIdx = this.tree.rangeQuery(left, nextMinIdx);
-        // add the left interval to the interval map
         intervalMap.set(leftIdx, [left, nextMinIdx, leftIdx]);
-        // add the left interval to the queue
         queue.push(leftIdx, this.wordRankings[leftIdx]);
       }
 
-      // do the same for the right
+      // if the right interval is valid add it to the queue and map
       if (nextMinIdx + 1 < right) {
         const rightIdx = this.tree.rangeQuery(nextMinIdx + 1, right);
         intervalMap.set(rightIdx, [nextMinIdx + 1, right, rightIdx]);
         queue.push(rightIdx, this.wordRankings[rightIdx]);
       }
     }
+    return foundIndices;
+  }
 
-    // increment each word start by 1 to skip the separator
-    const wordIndices = foundIndices.map(i => this.wordStarts[i] + 1);
-    return wordIndices.map(wordStartIdx => {
-      // find the end of the word by searching for the first separator after
-      // the word start
-      const wordEndIdx = this.string.indexOf(this.SEPARATOR, wordStartIdx);
-      if (wordEndIdx !== -1) {
-        return this.string.substring(wordStartIdx, wordEndIdx);
-      } else {
-        return this.string.substring(wordStartIdx);
-      }
-    });
+  public findTopKWords(prefix: string, k: number) {
+    let foundIndices = this.findTopKIndices(prefix, k);
+
+    if (foundIndices.length === 0) {
+      return [];
+    }
+    let foundWords = [];
+    for (let i = 0; i < foundIndices.length; i++) {
+      foundWords.push(this.getWordForIndex(foundIndices[i]));
+    }
+    return foundWords;
+  }
+
+  public findTopKWordsWithIds(prefix: string, k: number) {
+    if (this.wordIds === undefined) {
+      throw new Error("word ids is undefined");
+    }
+    let foundIndices = this.findTopKIndices(prefix, k);
+
+    if (foundIndices.length === 0) {
+      return [];
+    }
+
+    let foundWordsWithIds = [];
+    for (let i = 0; i < foundIndices.length; i++) {
+      const foundIdx = foundIndices[i];
+      foundWordsWithIds.push([
+        this.getWordForIndex(foundIdx),
+        this.wordIds[foundIdx]
+      ]);
+    }
+    return foundWordsWithIds;
   }
 
   public toJSON() {
-    if (this.tree !== undefined && this.wordRankings !== undefined) {
-      return JSON.stringify({
-        string: this.string,
-        array: this.wordStarts,
-        SEPARATOR: this.SEPARATOR,
-        tree: this.tree.toJSON(),
-        wordRankings: this.wordRankings
-      });
-    }
-    return JSON.stringify({
+    const objToSave: any = {
       string: this.string,
       array: this.wordStarts,
       SEPARATOR: this.SEPARATOR
-    });
+    };
+    if (this.tree !== undefined && this.wordRankings !== undefined) {
+      objToSave.tree = this.tree.toJSON();
+      objToSave.wordRankings = this.wordRankings;
+    }
+    if (this.wordIds !== undefined) {
+      objToSave.wordIds = this.wordIds;
+    }
+
+    return JSON.stringify(objToSave);
   }
 
   public static fromJSON(json: string) {
-    const { string, array, SEPARATOR, tree, wordRankings } = JSON.parse(json);
+    const {
+      string,
+      array,
+      SEPARATOR,
+      tree,
+      wordRankings,
+      wordIds
+    } = JSON.parse(json);
     return new SimpleFastPrefixCompletions({
       SEPARATOR,
       wordStarts: array,
       string,
       tree,
-      wordRankings
+      wordRankings,
+      wordIds
     });
   }
 }

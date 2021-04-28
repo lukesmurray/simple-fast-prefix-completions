@@ -116,4 +116,88 @@ describe("SimpleFastPrefixCompletions", () => {
       "seashore"
     ]);
   });
+
+  it("finds top k with ids", () => {
+    const rankedWordsWithIds: [string, number, number][] = [
+      ["sally", 2, 0],
+      ["sells", 5, 1],
+      ["seashells", 3, 2],
+      ["by", 8, 3],
+      ["the", 1, 4],
+      ["seashore", 6, 5]
+    ];
+    const completions = new SimpleFastPrefixCompletions({ rankedWordsWithIds });
+    expect(completions.findWordsWithIds("se")).toEqual([
+      ["seashells", 2],
+      ["seashore", 5],
+      ["sells", 1]
+    ]);
+
+    expect(completions.findTopKWordsWithIds("se", 1)).toEqual([
+      ["seashells", 2]
+    ]);
+    expect(completions.findTopKWordsWithIds("se", 2)).toEqual([
+      ["seashells", 2],
+      ["sells", 1]
+    ]);
+    expect(completions.findTopKWordsWithIds("se", 3)).toEqual([
+      ["seashells", 2],
+      ["sells", 1],
+      ["seashore", 5]
+    ]);
+
+    expect(completions.findTopKWordsWithIds("", Infinity)).toEqual([
+      ["the", 4],
+      ["sally", 0],
+      ["seashells", 2],
+      ["sells", 1],
+      ["seashore", 5],
+      ["by", 3]
+    ]);
+
+    expect(completions.findTopKWordsWithIds("s", Infinity)).toEqual([
+      ["sally", 0],
+      ["seashells", 2],
+      ["sells", 1],
+      ["seashore", 5]
+    ]);
+
+    const serialized = completions.toJSON();
+    const deserialized = SimpleFastPrefixCompletions.fromJSON(serialized);
+
+    expect(deserialized.findWordsWithIds("se")).toEqual([
+      ["seashells", 2],
+      ["seashore", 5],
+      ["sells", 1]
+    ]);
+
+    expect(deserialized.findTopKWordsWithIds("se", 1)).toEqual([
+      ["seashells", 2]
+    ]);
+    expect(deserialized.findTopKWordsWithIds("se", 2)).toEqual([
+      ["seashells", 2],
+      ["sells", 1]
+    ]);
+    expect(deserialized.findTopKWordsWithIds("se", 3)).toEqual([
+      ["seashells", 2],
+      ["sells", 1],
+      ["seashore", 5]
+    ]);
+
+    expect(deserialized.findTopKWordsWithIds("", Infinity)).toEqual([
+      ["the", 4],
+      ["sally", 0],
+      ["seashells", 2],
+      ["sells", 1],
+      ["seashore", 5],
+      ["by", 3]
+    ]);
+
+    expect(deserialized.findTopKWordsWithIds("s", Infinity)).toEqual([
+      ["sally", 0],
+      ["seashells", 2],
+      ["sells", 1],
+      ["seashore", 5]
+    ]);
+  });
 });
