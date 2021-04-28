@@ -3,7 +3,7 @@ import { SimpleFastPrefixCompletions } from "../src";
 
 const SEPARATOR = "\u0001";
 
-describe("suffix", () => {
+describe("prefix completions for words", () => {
   const sa = new SimpleFastPrefixCompletions({ SEPARATOR, words });
 
   it("finds the correct suffixes for cherub", () => {

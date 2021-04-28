@@ -1,4 +1,4 @@
-import { SparseTable } from "../src";
+import { SparseTable } from "../src/sparseTable";
 
 describe("sparseTable", () => {
   it("computes ranges correctly", () => {

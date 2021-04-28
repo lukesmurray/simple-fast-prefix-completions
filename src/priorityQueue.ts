@@ -84,4 +84,8 @@ export default class PriorityQueue<I> {
   public shrink() {
     this.ids.length = this.values.length = this.length;
   }
+
+  public isEmpty() {
+    return this.length === 0;
+  }
 }

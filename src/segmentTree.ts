@@ -22,19 +22,36 @@ export class SegmentTree {
    */
   private data: number[];
 
-  constructor(values: number[], f: (a: number, b: number) => number) {
-    this.n = values.length;
-    this.f = f;
-    this.data = Array(this.n * 2).fill(0);
+  constructor(options: {
+    // input values
+    values?: number[];
+    // function used to compute the segment tree
+    f: (a: number, b: number) => number;
+    // these results are passed in during serialization
+    n?: number;
+    data?: number[];
+  }) {
+    // if we're creating a new segment tree
+    if (options.values !== undefined) {
+      this.n = options.values.length;
+      this.f = options.f;
+      this.data = Array(this.n * 2).fill(0);
 
-    // fill the end of the array with the input values
-    for (let i = 0; i < this.n; i++) {
-      this.data[this.n + i] = values[i];
-    }
+      // fill the end of the array with the input values
+      for (let i = 0; i < this.n; i++) {
+        this.data[this.n + i] = options.values[i];
+      }
 
-    // fill the beginning of the the array with the range query data
-    for (let i = this.n - 1; i > 0; i--) {
-      this.data[i] = this.f(this.data[2 * i], this.data[2 * i + 1]);
+      // fill the beginning of the the array with the range query data
+      for (let i = this.n - 1; i > 0; i--) {
+        this.data[i] = this.f(this.data[2 * i], this.data[2 * i + 1]);
+      }
+    } else if (options.n !== undefined && options.data !== undefined) {
+      this.n = options.n;
+      this.data = options.data;
+      this.f = options.f;
+    } else {
+      throw new Error("must pass in values or valid deserialized data");
     }
   }
 
@@ -83,5 +100,21 @@ export class SegmentTree {
       // set the parent based on the parent children
       this.data[idx] = this.f(this.data[2 * idx], this.data[2 * idx + 1]);
     }
+  }
+
+  public toJSON() {
+    return JSON.stringify({
+      n: this.n,
+      data: this.data
+    });
+  }
+
+  public static fromJSON(json: string, f: (a: number, b: number) => number) {
+    const { n, data } = JSON.parse(json);
+    return new SegmentTree({
+      n,
+      data,
+      f
+    });
   }
 }
