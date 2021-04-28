@@ -45,6 +45,8 @@ The completion object takes `O(c + n)` space where `c` is the number of characte
 
 Solving Top K
 
+- v2 construct a segment tree
+  - https://cp-algorithms.com/data_structures/segment_tree.html
 - create a range maximum query for the array using a split data structure with unprocessed blocks on the bottom and a sparse table at the top
   - block size log n
   - sparse table for top level
