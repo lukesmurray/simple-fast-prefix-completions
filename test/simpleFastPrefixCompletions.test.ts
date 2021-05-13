@@ -200,4 +200,14 @@ describe("SimpleFastPrefixCompletions", () => {
       ["seashore", 5]
     ]);
   });
+
+  it("works with empty word lists", () => {
+    const completions = new SimpleFastPrefixCompletions({
+      rankedWordsWithIds: []
+    });
+    expect(completions.findWords("s")).toEqual([]);
+    expect(completions.findWordsWithIds("s")).toEqual([]);
+    expect(completions.findTopKWords("s", 5)).toEqual([]);
+    expect(completions.findTopKWordsWithIds("s", 5)).toEqual([]);
+  });
 });
